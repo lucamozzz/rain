@@ -107,3 +107,4 @@ ENV/
 
 analyzer_output/*
 !analyzer_output/.gitkeep
+.DS_Store
