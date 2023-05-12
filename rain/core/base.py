@@ -44,6 +44,7 @@ class LibTag(Enum):
     MONGODB = "PyMongo"
     TPOT = 'TPOT'
     PYSAD = "PySad"
+    BIGQUERY = "Google-Cloud-BigQuery"
     OTHER = "Other"
     BASE = "Base"
 
