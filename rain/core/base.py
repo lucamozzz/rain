@@ -45,6 +45,7 @@ class LibTag(Enum):
     TPOT = 'TPOT'
     PYSAD = "PySad"
     BIGQUERY = "Google-Cloud-BigQuery"
+    GCS = "Google-Cloud-Storage"
     OTHER = "Other"
     BASE = "Base"
 
