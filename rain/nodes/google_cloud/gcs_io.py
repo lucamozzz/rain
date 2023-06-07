@@ -16,9 +16,11 @@
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  """
 
-import os
+from os import getenv
 from google.cloud import storage
 from google.cloud.exceptions import NotFound
+from google.oauth2 import service_account
+from google.auth.exceptions import DefaultCredentialsError
 
 from typing import Union
 
@@ -59,8 +61,10 @@ class GCStorageCSVLoader(InputNode):
 
     def execute(self):
         param_dict = self.parameters.get_dict_from_group("read_csv")
-        credentials = {"token": os.getenv('GOOGLE_APPLICATION_CREDENTIALS')}
-        self.dataset = pandas.read_csv(**param_dict, storage_options=credentials)
+        credentials = getenv('GOOGLE_APPLICATION_CREDENTIALS')
+        if not credentials:
+            raise DefaultCredentialsError('Missing credentials')
+        self.dataset = pandas.read_csv(**param_dict, storage_options={"token": credentials})
 
     @classmethod
     def _get_tags(cls):
@@ -118,7 +122,15 @@ class GCStorageCSVWriter(OutputNode):
         if not isinstance(self.dataset, pandas.DataFrame):
             self.dataset = pandas.DataFrame(self.dataset)
 
-        client = storage.Client()
+        
+        try:
+            credentials = service_account.Credentials.from_service_account_file(
+                getenv("GOOGLE_APPLICATION_CREDENTIALS"),
+                scopes=["https://www.googleapis.com/auth/cloud-platform"],
+            )
+            client = storage.Client(credentials=credentials)
+        except:
+            raise DefaultCredentialsError('Missing credentials')
 
         try:
             bucket = client.get_bucket(self.parameters.bucket_name.value)

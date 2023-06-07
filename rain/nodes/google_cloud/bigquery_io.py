@@ -17,11 +17,13 @@
  """
 
 from google.cloud import bigquery
+from google.oauth2 import service_account
+from google.auth.exceptions import DefaultCredentialsError
 import pandas
 
 from rain.core.base import InputNode, OutputNode, Tags, LibTag, TypeTag
 from rain.core.parameter import KeyValueParameter, Parameters
-from rain.nodes.google_cloud.utils import get_gcp_credentials
+from os import getenv
 
 class BigQueryCSVLoader(InputNode):
     """Runs a SELECT on a BigQuery table and saves the result as a Pandas dataframe.
@@ -49,7 +51,14 @@ class BigQueryCSVLoader(InputNode):
         )
 
     def execute(self):
-        client = bigquery.Client(credentials=get_gcp_credentials())
+        try:
+            credentials = service_account.Credentials.from_service_account_file(
+                getenv("GOOGLE_APPLICATION_CREDENTIALS"),
+                scopes=["https://www.googleapis.com/auth/cloud-platform"],
+            )
+            client = bigquery.Client(credentials=credentials)
+        except:
+            raise DefaultCredentialsError('Missing credentials')
 
         query = self.parameters.query.value
         if query.strip().lower().split()[0] == "select":
@@ -88,7 +97,14 @@ class BigQueryCSVWriter(OutputNode):
         )
 
     def execute(self):
-        client = bigquery.Client(credentials=get_gcp_credentials())
+        try:
+            credentials = service_account.Credentials.from_service_account_file(
+                getenv("GOOGLE_APPLICATION_CREDENTIALS"),
+                scopes=["https://www.googleapis.com/auth/cloud-platform"],
+            )
+            client = bigquery.Client(credentials=credentials)
+        except:
+            raise DefaultCredentialsError('Missing credentials')
 
         # removes unsupported chars from column names
         def replace_chars(columns):
