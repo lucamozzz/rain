@@ -28,13 +28,13 @@ class TestBigQueryCSVLoader:
         check_param_not_found(BigQueryCSVLoader, path="", x=8)
 
     def test_dataset_load(self):
-        """Tests the execution of the PandasCSVLoader."""
-        gcstorage_loader = BigQueryCSVLoader(
+        """Tests the execution of the BigQueryCSVLoader."""
+        bq_loader = BigQueryCSVLoader(
             node_id='node1', query='select * from rainfall-e8e57.test.table1'
         )
-        assert gcstorage_loader.get_output_value('dataset') == None
-        gcstorage_loader.execute()
-        assert type(gcstorage_loader.get_output_value('dataset')) == DataFrame
+        assert bq_loader.get_output_value('dataset') == None
+        bq_loader.execute()
+        assert type(bq_loader.get_output_value('dataset')) == DataFrame
 
 
 class TestBigQueryCSVWriter:
@@ -43,11 +43,11 @@ class TestBigQueryCSVWriter:
         check_param_not_found(BigQueryCSVWriter, path="", x=8)
 
     def test_dataset_write(self):
-        """Tests the execution of the GCStorageCSVWriter."""
+        """Tests the execution of the BigQueryCSVWriter."""
         iris = load_iris(as_frame=True).data
 
-        gcstorage_writer = BigQueryCSVWriter(
+        bq_writer = BigQueryCSVWriter(
             "s1", table_id='rainfall-e8e57.test.table1'
         )
-        gcstorage_writer.set_input_value("dataset", iris)
-        gcstorage_writer.execute()
+        bq_writer.set_input_value("dataset", iris)
+        bq_writer.execute()
