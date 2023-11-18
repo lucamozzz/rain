@@ -100,7 +100,7 @@ class PandasCSVLoader(PandasInputNode):
         super(PandasCSVLoader, self).__init__(node_id)
 
         self.parameters = Parameters(
-            path=KeyValueParameter("filepath_or_buffer", str, file),
+            file=KeyValueParameter("filepath_or_buffer", str, file),
             delim=KeyValueParameter("delimiter", str, delim),
             index_col=KeyValueParameter("index_col", str, index_col)
         )
