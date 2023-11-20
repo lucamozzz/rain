@@ -48,12 +48,9 @@ try:
 except ModuleNotFoundError or ImportError:
     pass
 
-try:
-    from rain.nodes.google_cloud import *
-except ModuleNotFoundError or ImportError:
-    pass
-
-try:
-    from rain.nodes.unicam import *
-except ModuleNotFoundError or ImportError:
-    pass
+# TODO: fix import of new modules
+# The nodes in these modules are temporarily in the Pandas module
+# try:
+#     from rain.nodes.google_cloud import *
+# except ModuleNotFoundError or ImportError:
+#     pass

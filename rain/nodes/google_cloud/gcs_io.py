@@ -16,18 +16,18 @@
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  """
 
-from os import getenv
-from google.cloud.storage import Client
-from google.cloud.exceptions import NotFound
-from google.oauth2 import service_account
-from google.auth.exceptions import DefaultCredentialsError
+# from os import getenv
+# from google.cloud.storage import Client
+# from google.cloud.exceptions import NotFound
+# from google.oauth2 import service_account
+# from google.auth.exceptions import DefaultCredentialsError
 
-from typing import Union
+# from typing import Union
 
-import pandas
+# import pandas
 
-from rain.core.base import InputNode, OutputNode, Tags, LibTag, TypeTag
-from rain.core.parameter import KeyValueParameter, Parameters
+# from rain.core.base import InputNode, OutputNode, Tags, LibTag, TypeTag
+# from rain.core.parameter import KeyValueParameter, Parameters
 
 
 # class GCStorageCSVLoader(InputNode):
@@ -75,75 +75,75 @@ from rain.core.parameter import KeyValueParameter, Parameters
 #         return Tags(LibTag.GCS, TypeTag.INPUT)
 
 
-class GCStorageCSVWriter(OutputNode):
-    """Loads a pandas DataFrame into a Google Cloud Storage bucket.
+# class GCStorageCSVWriter(OutputNode):
+#     """Loads a pandas DataFrame into a Google Cloud Storage bucket.
 
-    Input
-    ------
-    dataset : pandas.DataFrame
-        The Pandas dataframe to be uploaded.
+#     Input
+#     ------
+#     dataset : pandas.DataFrame
+#         The Pandas dataframe to be uploaded.
 
-    Parameters
-    ----------
-    bucket_name : str
-        The ID of the GCS bucket.
-    destination_blob_name : str
-        The ID of the GCS object.
-    """
+#     Parameters
+#     ----------
+#     bucket_name : str
+#         The ID of the GCS bucket.
+#     destination_blob_name : str
+#         The ID of the GCS object.
+#     """
 
-    _input_vars = {"dataset": pandas.DataFrame}
+#     _input_vars = {"dataset": pandas.DataFrame}
     
-    def __init__(
-        self,
-        node_id: str,
-        bucket_name: str,
-        destination_blob_name: str,
-        delim: str = ",",
-        include_rows: bool = True,
-        rows_column_label: str = None,
-        include_columns: bool = True,
-        columns: list = None,
-    ):
-        super(GCStorageCSVWriter, self).__init__(node_id)
-        self.parameters = Parameters(
-            bucket_name=KeyValueParameter("bucket_name", str, bucket_name, True),
-            destination_blob_name =KeyValueParameter("destination_blob_name", str, destination_blob_name , True),
-            delim=KeyValueParameter("sep", str, delim),
-            include_rows=KeyValueParameter("index", bool, include_rows),
-            rows_column_label=KeyValueParameter("index_label", str, rows_column_label),
-            include_columns=KeyValueParameter("header", bool, include_columns),
-            columns=KeyValueParameter("columns", list, columns),
-        )
+#     def __init__(
+#         self,
+#         node_id: str,
+#         bucket_name: str,
+#         destination_blob_name: str,
+#         delim: str = ",",
+#         include_rows: bool = True,
+#         rows_column_label: str = None,
+#         include_columns: bool = True,
+#         columns: list = None,
+#     ):
+#         super(GCStorageCSVWriter, self).__init__(node_id)
+#         self.parameters = Parameters(
+#             bucket_name=KeyValueParameter("bucket_name", str, bucket_name, True),
+#             destination_blob_name =KeyValueParameter("destination_blob_name", str, destination_blob_name , True),
+#             delim=KeyValueParameter("sep", str, delim),
+#             include_rows=KeyValueParameter("index", bool, include_rows),
+#             rows_column_label=KeyValueParameter("index_label", str, rows_column_label),
+#             include_columns=KeyValueParameter("header", bool, include_columns),
+#             columns=KeyValueParameter("columns", list, columns),
+#         )
 
-        self.parameters.group_all("write_csv")
+#         self.parameters.group_all("write_csv")
 
-        self.parameters.add_parameter("bucket_name", KeyValueParameter("bucket_name", str, bucket_name, True))
-        self.parameters.add_parameter("destination_blob_name", KeyValueParameter("destination_blob_name", str, destination_blob_name, True))
+#         self.parameters.add_parameter("bucket_name", KeyValueParameter("bucket_name", str, bucket_name, True))
+#         self.parameters.add_parameter("destination_blob_name", KeyValueParameter("destination_blob_name", str, destination_blob_name, True))
 
-    def execute(self):
-        param_dict = self.parameters.get_dict_from_group("write_csv")
+#     def execute(self):
+#         param_dict = self.parameters.get_dict_from_group("write_csv")
 
-        if not isinstance(self.dataset, pandas.DataFrame):
-            self.dataset = pandas.DataFrame(self.dataset)
+#         if not isinstance(self.dataset, pandas.DataFrame):
+#             self.dataset = pandas.DataFrame(self.dataset)
 
         
-        try:
-            credentials = service_account.Credentials.from_service_account_file(
-                getenv("GOOGLE_APPLICATION_CREDENTIALS"),
-                scopes=["https://www.googleapis.com/auth/cloud-platform"],
-            )
-            client = Client(credentials=credentials)
-        except:
-            raise DefaultCredentialsError('Missing credentials')
+#         try:
+#             credentials = service_account.Credentials.from_service_account_file(
+#                 getenv("GOOGLE_APPLICATION_CREDENTIALS"),
+#                 scopes=["https://www.googleapis.com/auth/cloud-platform"],
+#             )
+#             client = Client(credentials=credentials)
+#         except:
+#             raise DefaultCredentialsError('Missing credentials')
 
-        try:
-            bucket = client.get_bucket(self.parameters.bucket_name.value)
-        except NotFound:
-            client.create_bucket(self.parameters.bucket_name.value)
-            bucket = client.get_bucket(self.parameters.bucket_name.value)
+#         try:
+#             bucket = client.get_bucket(self.parameters.bucket_name.value)
+#         except NotFound:
+#             client.create_bucket(self.parameters.bucket_name.value)
+#             bucket = client.get_bucket(self.parameters.bucket_name.value)
 
-        bucket.blob(self.parameters.destination_blob_name.value).upload_from_string(self.dataset.to_csv(**param_dict), 'text/csv')
+#         bucket.blob(self.parameters.destination_blob_name.value).upload_from_string(self.dataset.to_csv(**param_dict), 'text/csv')
 
-    @classmethod
-    def _get_tags(cls):
-        return Tags(LibTag.GCS, TypeTag.OUTPUT)
+#     @classmethod
+#     def _get_tags(cls):
+#         return Tags(LibTag.GCS, TypeTag.OUTPUT)
