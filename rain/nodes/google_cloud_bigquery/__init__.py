@@ -16,12 +16,7 @@
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  """
 
-from rain.nodes.google_cloud.bigquery_io import (
+from rain.nodes.google_cloud_bigquery import (
     BigQueryCSVLoader, 
     BigQueryCSVWriter
-)
-
-from rain.nodes.google_cloud.gcs_io import (
-    GCStorageCSVLoader, 
-    GCStorageCSVWriter
 )
