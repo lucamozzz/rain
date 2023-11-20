@@ -22,6 +22,5 @@ from rain.nodes.google_cloud.bigquery_io import (
 )
 
 from rain.nodes.google_cloud.gcs_io import (
-    GCStorageCSVLoader, 
     GCStorageCSVWriter
 )

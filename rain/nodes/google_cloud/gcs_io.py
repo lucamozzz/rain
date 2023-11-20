@@ -30,49 +30,49 @@ from rain.core.base import InputNode, OutputNode, Tags, LibTag, TypeTag
 from rain.core.parameter import KeyValueParameter, Parameters
 
 
-class GCStorageCSVLoader(InputNode):
-    """Loads a pandas DataFrame from a CSV stored in a Google Cloud Storage bucket.
+# class GCStorageCSVLoader(InputNode):
+#     """Loads a pandas DataFrame from a CSV stored in a Google Cloud Storage bucket.
 
-    Output
-    ------
-    dataset : pandas.DataFrame
-        The loaded CSV file as a pandas DataFrame.
+#     Output
+#     ------
+#     dataset : pandas.DataFrame
+#         The loaded CSV file as a pandas DataFrame.
 
-    Parameters
-    ----------
-    bucket_name : str
-        The ID of the GCS bucket.
-    object_path : str
-        The path of the GCS object.
-    delim : str, default ','
-        Delimiter symbol of the CSV file.
-    index_col : str, default=None
-        Column to use as the row labels of the DataFrame, given as string name.
-    """
+#     Parameters
+#     ----------
+#     bucket_name : str
+#         The ID of the GCS bucket.
+#     object_path : str
+#         The path of the GCS object.
+#     delim : str, default ','
+#         Delimiter symbol of the CSV file.
+#     index_col : str, default=None
+#         Column to use as the row labels of the DataFrame, given as string name.
+#     """
 
-    _output_vars = {"dataset": pandas.DataFrame}
+#     _output_vars = {"dataset": pandas.DataFrame}
 
-    def __init__(self, node_id: str, bucket_name: str, object_path: str, delim: str = ",", index_col: Union[int, str] = None):
-        super(GCStorageCSVLoader, self).__init__(node_id)
+#     def __init__(self, node_id: str, bucket_name: str, object_path: str, delim: str = ",", index_col: Union[int, str] = None):
+#         super(GCStorageCSVLoader, self).__init__(node_id)
 
-        self.parameters = Parameters(
-            path=KeyValueParameter("filepath_or_buffer", str, 'gcs://' + bucket_name + '/' + object_path),
-            delim=KeyValueParameter("delimiter", str, delim),
-            index_col=KeyValueParameter("index_col", str, index_col)
-        )
+#         self.parameters = Parameters(
+#             path=KeyValueParameter("filepath_or_buffer", str, 'gcs://' + bucket_name + '/' + object_path),
+#             delim=KeyValueParameter("delimiter", str, delim),
+#             index_col=KeyValueParameter("index_col", str, index_col)
+#         )
 
-        self.parameters.group_all("read_csv")
+#         self.parameters.group_all("read_csv")
 
-    def execute(self):
-        param_dict = self.parameters.get_dict_from_group("read_csv")
-        credentials = getenv('GOOGLE_APPLICATION_CREDENTIALS')
-        if not credentials:
-            raise DefaultCredentialsError('Missing credentials')
-        self.dataset = pandas.read_csv(**param_dict, storage_options={"token": credentials})
+#     def execute(self):
+#         param_dict = self.parameters.get_dict_from_group("read_csv")
+#         credentials = getenv('GOOGLE_APPLICATION_CREDENTIALS')
+#         if not credentials:
+#             raise DefaultCredentialsError('Missing credentials')
+#         self.dataset = pandas.read_csv(**param_dict, storage_options={"token": credentials})
 
-    @classmethod
-    def _get_tags(cls):
-        return Tags(LibTag.GCS, TypeTag.INPUT)
+#     @classmethod
+#     def _get_tags(cls):
+#         return Tags(LibTag.GCS, TypeTag.INPUT)
 
 
 class GCStorageCSVWriter(OutputNode):
