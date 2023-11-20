@@ -132,7 +132,7 @@ class GCStorageCSVWriter(OutputNode):
                 getenv("GOOGLE_APPLICATION_CREDENTIALS"),
                 scopes=["https://www.googleapis.com/auth/cloud-platform"],
             )
-            client = storage.Client(credentials=credentials)
+            client = Client(credentials=credentials)
         except:
             raise DefaultCredentialsError('Missing credentials')
 
