@@ -17,7 +17,7 @@
  """
 
 from os import getenv
-from google.cloud import storage
+from google.cloud.storage import Client
 from google.cloud.exceptions import NotFound
 from google.oauth2 import service_account
 from google.auth.exceptions import DefaultCredentialsError
@@ -42,8 +42,12 @@ class GCStorageCSVLoader(InputNode):
     ----------
     bucket_name : str
         The ID of the GCS bucket.
-    destination_blob_name : str
-        The ID of the GCS object.
+    object_path: str
+        The path of the GCS object.
+    delim : str, default ','
+        Delimiter symbol of the CSV file.
+    index_col : str, default=None
+        Column to use as the row labels of the DataFrame, given as string name.
     """
 
     _output_vars = {"dataset": pandas.DataFrame}

@@ -16,7 +16,7 @@
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  """
 
-from google.cloud import bigquery
+from google.cloud.bigquery import Client
 from google.oauth2 import service_account
 from google.auth.exceptions import DefaultCredentialsError
 import pandas
@@ -56,11 +56,11 @@ class BigQueryCSVLoader(InputNode):
                 getenv("GOOGLE_APPLICATION_CREDENTIALS"),
                 scopes=["https://www.googleapis.com/auth/cloud-platform"],
             )
-            client = bigquery.Client(credentials=credentials)
+            client = Client(credentials=credentials)
         except:
             raise DefaultCredentialsError('Missing credentials')
 
-        query = self.parameters.query.value
+        query: str = self.parameters.query.value
         if query.strip().lower().split()[0] == "select":
             self.dataset: pandas.DataFrame = client.query(query).result().to_dataframe()
         else:
@@ -102,7 +102,7 @@ class BigQueryCSVWriter(OutputNode):
                 getenv("GOOGLE_APPLICATION_CREDENTIALS"),
                 scopes=["https://www.googleapis.com/auth/cloud-platform"],
             )
-            client = bigquery.Client(credentials=credentials)
+            client = Client(credentials=credentials)
         except:
             raise DefaultCredentialsError('Missing credentials')
 
@@ -112,7 +112,7 @@ class BigQueryCSVWriter(OutputNode):
             to_replace = [' ', '(', ')', '[', ']', '{', '}', '!', '@', '~', '\\', '$', '`', '^', '.', ',', '*']
             for column in columns:
                 for char in to_replace:
-                    column = column.replace(char, '_')
+                    column: str = column.replace(char, '_')
                 new_columns.append(column)
             return new_columns
 
