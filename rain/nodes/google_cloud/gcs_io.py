@@ -42,7 +42,7 @@ class GCStorageCSVLoader(InputNode):
     ----------
     bucket_name : str
         The ID of the GCS bucket.
-    object_path: str
+    object_path : str
         The path of the GCS object.
     delim : str, default ','
         Delimiter symbol of the CSV file.
