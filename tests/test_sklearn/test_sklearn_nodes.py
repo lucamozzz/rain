@@ -23,7 +23,7 @@ from sklearn.model_selection import train_test_split
 import rain.nodes.sklearn as ss
 from rain.nodes.sklearn.node_structure import SklearnNode
 
-sklearn_nodes = [ss.SklearnLinearSVC, ss.SimpleKMeans]
+sklearn_nodes = [ss.SklearnLinearSVC, ss.KMeansClusterer]
 
 
 @pytest.mark.parametrize("class_or_obj", sklearn_nodes)
@@ -43,7 +43,7 @@ class TestKMeans:
     def test_execution(self):
         iris = load_iris(as_frame=True).data
         iristrain, iristest = train_test_split(iris, test_size=0.15, shuffle=False)
-        node = ss.SimpleKMeans("km", ["fit", "score"])
+        node = ss.KMeansClusterer("km", ["fit", "score"])
         node.set_input_value("fit_dataset", iristrain)
         node.set_input_value("score_dataset", iristest)
 

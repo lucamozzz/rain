@@ -49,6 +49,11 @@ except ModuleNotFoundError or ImportError:
     pass
 
 try:
+    from rain.nodes.pm4py import *
+except ModuleNotFoundError or ImportError:
+    pass
+
+try:
     from rain.nodes.google_cloud_bigquery import *
 except ModuleNotFoundError or ImportError:
     pass

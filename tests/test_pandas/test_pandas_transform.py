@@ -333,12 +333,12 @@ class TestPandasSequence:
             )
 
     # def test_exception_using_non_pandas_stages(self):
-    #     # TODO AttributeError: 'SimpleKMeans' object has no attribute '_get_params_as_dict()'. Fixare quest'errore prima di testare questo.
-    #     from rain import SimpleKMeans
+    #     # TODO AttributeError: 'KMeansClusterer' object has no attribute '_get_params_as_dict()'. Fixare quest'errore prima di testare questo.
+    #     from rain import KMeansClusterer
     #     with pytest.raises(PandasSequenceException):
     #         ps = PandasSequence("ps", stages=[
     #             PandasColumnsFiltering("pcf", columns_range=(0, 1)),
-    #             SimpleKMeans("skm", ["fit"])
+    #             KMeansClusterer("skm", ["fit"])
     #         ])
 
     def test_execution(self, initial_dataframe):

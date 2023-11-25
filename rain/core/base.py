@@ -39,8 +39,9 @@ class LibTag(Enum):
     """
 
     PANDAS = "Pandas"
+    PM4PY = "pm4py"
     SPARK = "PySpark"
-    SKLEARN = "Scikit-Learn"
+    SKLEARN = "scikit-learn\nscikit-learn-extra "
     MONGODB = "PyMongo"
     TPOT = 'TPOT'
     PYSAD = "PySad"

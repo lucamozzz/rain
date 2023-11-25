@@ -77,7 +77,7 @@ computational_data = [
     sr.PandasFilterRows,
     sr.PandasSelectRows,
     sr.PandasGroupBy,
-    sr.SimpleKMeans,
+    sr.KMeansClusterer,
     sr.SklearnLinearSVC,
     sr.SparkPipelineNode,
     sr.Tokenizer,

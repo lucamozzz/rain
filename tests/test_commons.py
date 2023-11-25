@@ -23,7 +23,7 @@ from rain import (
     PandasPivot,
     PandasRenameColumn,
     SklearnLinearSVC,
-    SimpleKMeans,
+    KMeansClusterer,
     SparkCSVLoader,
     SparkModelLoader,
     SparkSaveModel,
@@ -152,7 +152,7 @@ classes = [
         Tags(LibTag.SKLEARN, TypeTag.CLUSTERER),
     ),
     (
-        SimpleKMeans,
+        KMeansClusterer,
         ["fit_dataset", "predict_dataset", "score_dataset", "transform_dataset"],
         ["fitted_model", "predictions", "score_value", "transformed_dataset", "labels"],
         ["fit", "predict", "score", "transform"],

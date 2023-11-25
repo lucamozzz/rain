@@ -16,7 +16,10 @@
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  """
 
-from rain.nodes.sklearn.cluster import SimpleKMeans
+from rain.nodes.sklearn.cluster import (
+    KMeansClusterer,
+    KMedoidsClusterer
+)
 from rain.nodes.sklearn.svm import SklearnLinearSVC
 from rain.nodes.sklearn.functions import (
     TrainTestSampleTargetSplit,
