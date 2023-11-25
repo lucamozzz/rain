@@ -61,6 +61,8 @@ class TypeTag(Enum):
     TRANSFORMER = "Transformer"
     CLASSIFIER = "Classifier"
     CLUSTERER = "Clusterer"
+    DISCOVERER = "Discoverer"
+    CONFORMANCE_CHECKER = "Conformance Checker"
     REGRESSOR = "Regressor"
     ESTIMATOR = "Estimator"
     TRAINER = "Trainer"
