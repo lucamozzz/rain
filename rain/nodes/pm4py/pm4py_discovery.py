@@ -16,10 +16,9 @@
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  """
 
-from typing import Tuple
 import pm4py
 import pandas
-from pm4py.objects.petri_net.obj import PetriNet, Marking
+from pm4py.objects.bpmn.obj import BPMN
 from rain.core.base import ComputationalNode, Tags, LibTag, TypeTag
 from rain.core.parameter import KeyValueParameter, Parameters
 
@@ -34,7 +33,7 @@ class Pm4pyInductiveMiner(ComputationalNode):
 
     Output
     ------
-    model : Tuple[PetriNet, Marking, Marking]
+    model : BPMN
         The model discovered by the inductive miner algorithm.
 
     Notes
@@ -58,15 +57,10 @@ class Pm4pyInductiveMiner(ComputationalNode):
         )
 
     _input_vars = {"event_log": pandas.DataFrame}
-    _output_vars = {"model": Tuple[PetriNet, Marking, Marking]}
+    _output_vars = {"model": BPMN}
 
     def execute(self):
-        self.model = pm4py.discover_petri_net_inductive(
-            self.event_log,
-            activity_key=self.parameters.activity_key.value,
-            timestamp_key=self.parameters.timestamp_key.value,
-            case_id_key=self.parameters.case_id_key.value
-        )
+        self.model = pm4py.discover_bpmn_inductive(self.event_log)
 
     @classmethod
     def _get_tags(cls):

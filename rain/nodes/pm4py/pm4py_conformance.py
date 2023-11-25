@@ -18,9 +18,8 @@
 
 import pandas
 import pm4py
-from pm4py.objects.petri_net.obj import PetriNet, Marking
+from pm4py.objects.bpmn.obj import BPMN
 from rain.core.base import Tags, LibTag, TypeTag, ComputationalNode
-from typing import Tuple
 
 
 class Pm4pyTokenBasedReplay(ComputationalNode):
@@ -30,7 +29,7 @@ class Pm4pyTokenBasedReplay(ComputationalNode):
     -----
     event_log : pandas.DataFrame
         The source event logs.
-    model : Tuple[PetriNet, Marking, Marking]
+    model : BPMN
         The discovered reference model.
 
     Output
@@ -50,11 +49,12 @@ class Pm4pyTokenBasedReplay(ComputationalNode):
         ):
         super(Pm4pyTokenBasedReplay, self).__init__(node_id)
 
-    _input_vars = {"event_log": pandas.DataFrame, "model": Tuple[PetriNet, Marking, Marking]}
+    _input_vars = {"event_log": pandas.DataFrame, "model": BPMN}
     _output_vars = {"diagnostics": pandas.DataFrame}
 
     def execute(self):
-        net, initial_marking, final_marking = self.model
+        bpmn: BPMN = self.model
+        net, initial_marking, final_marking = pm4py.convert_to_petri_net(bpmn)
         self.diagnostics: pandas.DataFrame = pm4py.conformance_diagnostics_token_based_replay(
             self.event_log,
             net,
