@@ -168,3 +168,72 @@ class Pm4pyXESWriter(Pm4pyOutputNode):
             {"_id": self.parameters.folder.value},
             {"$push": {"files": file_id}}
         )
+
+
+class Pm4pyBPMNWriter(OutputNode):
+    """Writes a model into a BPMN file.
+
+    Input
+    -----
+    model : BPMN
+        The BPMN model to write in a BPMN file.
+
+    Parameters
+    ----------
+    folder : str
+        Folder where the BPMN file will be stored.
+    name : str
+        Of the BPMN file.
+
+    Notes
+    -----
+    Visit `<https://pandas.pydata.org/pandas-docs/version/1.3/reference/api/pandas.DataFrame.to_csv.html>`_ for Pandas
+    to_csv documentation.
+    """
+
+    def __init__(
+        self,
+        node_id: str,
+        folder: str,
+        name: str = "result.bpmn",
+    ):
+        super(Pm4pyXESWriter, self).__init__(node_id)
+        self.parameters = Parameters(
+            folder=KeyValueParameter("folder", str, folder, True),
+            name=KeyValueParameter("name", str, name),
+        )
+        
+    _input_vars = {"model": pm4py.objects.bpmn.obj.BPMN}
+
+    def execute(self):
+        client = MongoClient(MONGODB_URL)
+        db = client[RAINFALL_DB]
+        collection = db[FILES_COLLECTION]
+        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        file_id = 'file-' + str(uuid.uuid4())
+        file_path = "./" + file_id + ".bpmn"
+        pm4py.write_bpmn(self.model, file_path)
+        with open(file_path, 'r') as bpmn_file:
+            file_contents = bpmn_file.read()
+
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+        file = {
+            "_id": file_id,
+            "created_at": current_time,
+            "name": self.parameters.name.value,
+            "content": file_contents,
+            "folder": self.parameters.folder.value
+        }
+        collection.insert_one(file)
+        collection = db[FOLDERS_COLLECTION]
+        collection.update_one(
+            {"_id": self.parameters.folder.value},
+            {"$push": {"files": file_id}}
+        )
+
+    @classmethod
+    def _get_tags(cls):
+        return Tags(LibTag.PM4PY, TypeTag.OUTPUT)
+    

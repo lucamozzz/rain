@@ -36,6 +36,15 @@ class Pm4pyInductiveMiner(ComputationalNode):
     model : BPMN
         The model discovered by the inductive miner algorithm.
 
+    Parameters
+    ----------
+    activity_key : str
+        Name of the activity field.
+    timestamp_key : str
+        Name of the timestamp field.
+    case_id_key : str
+        Name of the case identifier field.
+
     Notes
     -----
     Visit `<https://pandas.pydata.org/pandas-docs/version/1.3/reference/api/pandas.read_csv.html>`_ for Pandas read_csv
