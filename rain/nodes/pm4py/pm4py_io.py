@@ -197,7 +197,7 @@ class Pm4pyBPMNWriter(OutputNode):
         folder: str,
         name: str = "result.bpmn",
     ):
-        super(Pm4pyXESWriter, self).__init__(node_id)
+        super(Pm4pyBPMNWriter, self).__init__(node_id)
         self.parameters = Parameters(
             folder=KeyValueParameter("folder", str, folder, True),
             name=KeyValueParameter("name", str, name),
