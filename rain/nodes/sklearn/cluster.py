@@ -118,7 +118,7 @@ class KMedoidsClusterer(SklearnClusterer):
         If set to True, the user must then feed the clusterer with a precomputed kernel matrix.
     """
 
-    _output_vars = {"labels": pandas.DataFrame}
+    _output_vars = {"labels": pandas.DataFrame, "medoids": pandas.Series}
 
     def __init__(self, node_id: str, execute: list, n_clusters: int = 8, precomputed: bool = False):
         super(KMedoidsClusterer, self).__init__(node_id, execute)
@@ -133,3 +133,7 @@ class KMedoidsClusterer(SklearnClusterer):
     def execute(self):
         super(KMedoidsClusterer, self).execute()
         self.labels = self.fitted_model.labels_
+        if self.parameters.metric.value == "precomputed":
+            self.medoids = pandas.Series(self.fitted_model.medoid_indices_)
+        else:
+            self.medoids = pandas.Series(self.fitted_model.cluster_centers_)
