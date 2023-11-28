@@ -86,8 +86,6 @@ class KMedoidsClusterer(SklearnClusterer):
         The dataset that will be used to perform the fit of the clusterer.
     predict_dataset : pandas.DataFrame
         The dataset that will be used to perform the predict of the clusterer.
-    score_dataset : pandas.DataFrame
-        The dataset that will be used to perform the scoring.
     transform_dataset : pandas.DataFrame
         The dataset that will be used to perform the transform.
 
@@ -97,19 +95,20 @@ class KMedoidsClusterer(SklearnClusterer):
         The model that results from the fit of the estimator.
     predictions : pandas.DataFrame
         The predictions that result from the predict.
-    score_value : float
-        The score value that results from the scoring.
     transformed_dataset : pandas.DataFrame
         The dataset that results from the transform.
     labels : pandas.DataFrame
         Labels of each point.
         It corresponds to the 'labels_' attribute of the sklearn KMeans.
+    medoids : pandas.DataFrame
+        The indices of the medoid rows in X, if 'precomputed' == true,
+        cluster centers, i.e. medoids, otherwise.
 
     Parameters
     ----------
     node_id : str
         Id of the node.
-    execute : [fit, predict, score, transform]
+    execute : [fit, predict, transform]
         List of strings to specify the methods to execute.
         The allowed strings are those from the _method attribute.
     n_clusters : int
@@ -118,7 +117,7 @@ class KMedoidsClusterer(SklearnClusterer):
         If set to True, the user must then feed the clusterer with a precomputed kernel matrix.
     """
 
-    _output_vars = {"labels": pandas.DataFrame, "medoids": pandas.Series}
+    _output_vars = {"labels": pandas.DataFrame, "medoids": pandas.DataFrame}
 
     def __init__(self, node_id: str, execute: list, n_clusters: int = 8, precomputed: bool = False):
         super(KMedoidsClusterer, self).__init__(node_id, execute)
@@ -134,6 +133,6 @@ class KMedoidsClusterer(SklearnClusterer):
         super(KMedoidsClusterer, self).execute()
         self.labels = self.fitted_model.labels_
         if self.parameters.metric.value == "precomputed":
-            self.medoids = pandas.Series(self.fitted_model.medoid_indices_)
+            self.medoids = pandas.DataFrame(self.fitted_model.medoid_indices_)
         else:
-            self.medoids = pandas.Series(self.fitted_model.cluster_centers_)
+            self.medoids = pandas.DataFrame(self.fitted_model.cluster_centers_)
