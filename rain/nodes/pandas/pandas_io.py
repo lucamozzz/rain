@@ -18,20 +18,12 @@
 
 from abc import abstractmethod
 from typing import Union
-import uuid
-import os
+
 import pandas
 import pandas as pd
-from datetime import datetime
-from pymongo import MongoClient
-from io import StringIO
+
 from rain.core.base import InputNode, OutputNode, Tags, LibTag, TypeTag
 from rain.core.parameter import KeyValueParameter, Parameters
-
-MONGODB_URL = os.environ.get("MONGODB_URL", "mongodb://localhost:27017/")
-RAINFALL_DB = 'rainfall'
-FILES_COLLECTION = 'files'
-FOLDERS_COLLECTION = 'folders'
 
 
 class PandasInputNode(InputNode):
@@ -72,7 +64,7 @@ class PandasCSVLoader(PandasInputNode):
 
     Parameters
     ----------
-    file : str
+    path : str
         Of the CSV file.
     delim : str, default ','
         Delimiter symbol of the CSV file.
@@ -96,11 +88,11 @@ class PandasCSVLoader(PandasInputNode):
     # encoding_errors='strict', dialect=None, error_bad_lines=None, warn_bad_lines=None, on_bad_lines=None,
     # delim_whitespace=False, low_memory=True, memory_map=False, float_precision=None, storage_options=None }
 
-    def __init__(self, node_id: str, file: str, delim: str = ",", index_col: Union[int, str] = None):
+    def __init__(self, node_id: str, path: str, delim: str = ",", index_col: Union[int, str] = None):
         super(PandasCSVLoader, self).__init__(node_id)
 
         self.parameters = Parameters(
-            file=KeyValueParameter("filepath_or_buffer", str, file),
+            path=KeyValueParameter("filepath_or_buffer", str, path),
             delim=KeyValueParameter("delimiter", str, delim),
             index_col=KeyValueParameter("index_col", str, index_col)
         )
@@ -108,13 +100,8 @@ class PandasCSVLoader(PandasInputNode):
         self.parameters.group_all("read_csv")
 
     def execute(self):
-        client = MongoClient(MONGODB_URL)
-        db = client[RAINFALL_DB]
-        collection = db[FILES_COLLECTION]
-        document = collection.find_one({'_id': self.parameters.file.value})
-        csv_content = document['content']
-        df = pd.read_csv(StringIO(csv_content))
-        self.dataset = df
+        param_dict = self.parameters.get_dict_from_group("read_csv")
+        self.dataset = pandas.read_csv(**param_dict)
 
 
 class PandasCSVWriter(PandasOutputNode):
@@ -127,10 +114,8 @@ class PandasCSVWriter(PandasOutputNode):
 
     Parameters
     ----------
-    name : str
+    path : str
         Of the CSV file.
-    folder : str
-        For storing the CSV file.
     delim : str, default ','
         Delimiter symbol of the CSV file.
     include_rows : bool, default True
@@ -163,8 +148,7 @@ class PandasCSVWriter(PandasOutputNode):
     def __init__(
         self,
         node_id: str,
-        folder: str,
-        name: str,
+        path: str,
         delim: str = ",",
         include_rows: bool = True,
         rows_column_label: str = None,
@@ -173,8 +157,7 @@ class PandasCSVWriter(PandasOutputNode):
     ):
         super(PandasCSVWriter, self).__init__(node_id)
         self.parameters = Parameters(
-            name=KeyValueParameter("name", str, name),
-            folder=KeyValueParameter("folder", str, folder),
+            path=KeyValueParameter("path_or_buf", str, path),
             delim=KeyValueParameter("sep", str, delim),
             include_rows=KeyValueParameter("index", bool, include_rows),
             rows_column_label=KeyValueParameter("index_label", str, rows_column_label),
@@ -185,24 +168,9 @@ class PandasCSVWriter(PandasOutputNode):
         self.parameters.group_all("write_csv")
 
     def execute(self):
-        client = MongoClient(MONGODB_URL)
-        db = client[RAINFALL_DB]
-        collection = db[FILES_COLLECTION]
-        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        file_id = 'file-' + str(uuid.uuid4())
-        csv_buffer = StringIO()
-        self.dataset.to_csv(csv_buffer, index=False)
-        csv_string = csv_buffer.getvalue()
-        file = {
-            "_id": file_id,
-            "created_at": current_time,
-            "name": self.parameters.name.value,
-            "content": csv_string,
-            "folder": self.parameters.folder.value
-        }
-        collection.insert_one(file)
-        collection = db[FOLDERS_COLLECTION]
-        collection.update_one(
-            {"_id": self.parameters.folder.value},
-            {"$push": {"files": file_id}}
-        )
+        param_dict = self.parameters.get_dict_from_group("write_csv")
+
+        if not isinstance(self.dataset, pd.DataFrame):
+            self.dataset = pd.DataFrame(self.dataset)
+
+        self.dataset.to_csv(**param_dict)

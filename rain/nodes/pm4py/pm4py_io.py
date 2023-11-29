@@ -17,19 +17,14 @@
  """
 
 from abc import abstractmethod
-import uuid
-import os
-import pm4py
+from typing import Union
+
 import pandas
-from datetime import datetime
-from pymongo import MongoClient
+import pandas as pd
+import pm4py
+
 from rain.core.base import InputNode, OutputNode, Tags, LibTag, TypeTag
 from rain.core.parameter import KeyValueParameter, Parameters
-
-MONGODB_URL = os.environ.get("MONGODB_URL", "mongodb://mongo:27017/")
-RAINFALL_DB = 'rainfall'
-FILES_COLLECTION = 'files'
-FOLDERS_COLLECTION = 'folders'
 
 
 class Pm4pyInputNode(InputNode):
@@ -60,18 +55,19 @@ class Pm4pyOutputNode(OutputNode):
         return Tags(LibTag.PM4PY, TypeTag.OUTPUT)
 
 
+
 class Pm4pyXESLoader(Pm4pyInputNode):
     """Loads a pandas DataFrame from a XES file.
 
     Output
     ------
     dataset : pandas.DataFrame
-        The loaded xes file as a pandas DataFrame.
+        The loaded XES file as a pandas DataFrame.
 
     Parameters
     ----------
-    file : str
-        ID of the XES file.
+    path : str
+        Of the XES file.
 
     Notes
     -----
@@ -79,161 +75,44 @@ class Pm4pyXESLoader(Pm4pyInputNode):
     documentation.
     """
 
-    def __init__(self, node_id: str, file: str):
+    def __init__(self, node_id: str, path: str):
         super(Pm4pyXESLoader, self).__init__(node_id)
 
         self.parameters = Parameters(
-            file=KeyValueParameter("filepath_or_buffer", str, file, True),
+            path=KeyValueParameter("path", str, path, True),
         )
 
     def execute(self):
-        client = MongoClient(MONGODB_URL)
-        db = client[RAINFALL_DB]
-        collection = db[FILES_COLLECTION]
-        document = collection.find_one({'_id': self.parameters.file.value})
-        xes_content = document['content']
-
-        file_path = "./" + self.parameters.file.value + ".xes"
-        with open(file_path, 'w') as xes_file:
-            xes_file.write(xes_content)
-
-        df: pandas.DataFrame = pm4py.read_xes(file_path)
+        df: pandas.DataFrame = pm4py.read_xes(self.parameters.path.value)
         self.dataset = df
-
-        if os.path.exists(file_path):
-            os.remove(file_path)
 
 
 class Pm4pyXESWriter(Pm4pyOutputNode):
     """Writes a pandas DataFrame into a XES file.
 
     Input
-    -----
+    ------
     dataset : pandas.DataFrame
-        The pandas DataFrame to write in a XES file.
+        The pandas DataFrame to be written as XES file.
 
     Parameters
     ----------
-    folder : str
-        Folder where the XES file will be stored.
-    name : str
+    path : str
         Of the XES file.
-    case_id_key : str
-        Column key that identifies the case identifier.
 
     Notes
     -----
-    Visit `<https://pandas.pydata.org/pandas-docs/version/1.3/reference/api/pandas.DataFrame.to_csv.html>`_ for Pandas
-    to_csv documentation.
+    Visit `<https://pandas.pydata.org/pandas-docs/version/1.3/reference/api/pandas.read_csv.html>`_ for Pandas read_csv
+    documentation.
     """
 
-    def __init__(
-        self,
-        node_id: str,
-        folder: str,
-        name: str = "result.xes",
-        case_id_key: str = "case:concept:name"
-    ):
+    def __init__(self, node_id: str, path: str, case_id_key: str = "case:concept:name"):
         super(Pm4pyXESWriter, self).__init__(node_id)
+
         self.parameters = Parameters(
-            folder=KeyValueParameter("folder", str, folder, True),
-            name=KeyValueParameter("name", str, name),
+            path=KeyValueParameter("path", str, path, True),
             case_id_key=KeyValueParameter("case_id_key", str, case_id_key),
         )
 
     def execute(self):
-        client = MongoClient(MONGODB_URL)
-        db = client[RAINFALL_DB]
-        collection = db[FILES_COLLECTION]
-        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        file_id = 'file-' + str(uuid.uuid4())
-        file_path = "./" + file_id + ".xes"
-        pm4py.write_xes(self.dataset, file_path, self.parameters.case_id_key.value)
-        with open(file_path, 'r') as xes_file:
-            file_contents = xes_file.read()
-
-        if os.path.exists(file_path):
-            os.remove(file_path)
-
-        file = {
-            "_id": file_id,
-            "created_at": current_time,
-            "name": self.parameters.name.value,
-            "content": file_contents,
-            "folder": self.parameters.folder.value
-        }
-        collection.insert_one(file)
-        collection = db[FOLDERS_COLLECTION]
-        collection.update_one(
-            {"_id": self.parameters.folder.value},
-            {"$push": {"files": file_id}}
-        )
-
-
-class Pm4pyBPMNWriter(OutputNode):
-    """Writes a model into a BPMN file.
-
-    Input
-    -----
-    model : BPMN
-        The BPMN model to write in a BPMN file.
-
-    Parameters
-    ----------
-    folder : str
-        Folder where the BPMN file will be stored.
-    name : str
-        Of the BPMN file.
-
-    Notes
-    -----
-    Visit `<https://pandas.pydata.org/pandas-docs/version/1.3/reference/api/pandas.DataFrame.to_csv.html>`_ for Pandas
-    to_csv documentation.
-    """
-
-    def __init__(
-        self,
-        node_id: str,
-        folder: str,
-        name: str = "result.bpmn",
-    ):
-        super(Pm4pyBPMNWriter, self).__init__(node_id)
-        self.parameters = Parameters(
-            folder=KeyValueParameter("folder", str, folder, True),
-            name=KeyValueParameter("name", str, name),
-        )
-        
-    _input_vars = {"model": pm4py.objects.bpmn.obj.BPMN}
-
-    def execute(self):
-        client = MongoClient(MONGODB_URL)
-        db = client[RAINFALL_DB]
-        collection = db[FILES_COLLECTION]
-        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        file_id = 'file-' + str(uuid.uuid4())
-        file_path = "./" + file_id + ".bpmn"
-        pm4py.write_bpmn(self.model, file_path)
-        with open(file_path, 'r') as bpmn_file:
-            file_contents = bpmn_file.read()
-
-        if os.path.exists(file_path):
-            os.remove(file_path)
-
-        file = {
-            "_id": file_id,
-            "created_at": current_time,
-            "name": self.parameters.name.value,
-            "content": file_contents,
-            "folder": self.parameters.folder.value
-        }
-        collection.insert_one(file)
-        collection = db[FOLDERS_COLLECTION]
-        collection.update_one(
-            {"_id": self.parameters.folder.value},
-            {"$push": {"files": file_id}}
-        )
-
-    @classmethod
-    def _get_tags(cls):
-        return Tags(LibTag.PM4PY, TypeTag.OUTPUT)
-    
+        pm4py.write_xes(self.dataset, self.parameters.path.value, self.parameters.case_id_key.value)
