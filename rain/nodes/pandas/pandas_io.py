@@ -16,14 +16,22 @@
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  """
 
+import os
+import uuid
+from io import StringIO
 from abc import abstractmethod
 from typing import Union
-
-import pandas
-import pandas as pd
-
+from datetime import datetime
 from rain.core.base import InputNode, OutputNode, Tags, LibTag, TypeTag
 from rain.core.parameter import KeyValueParameter, Parameters
+from pymongo import MongoClient
+import pandas
+
+
+MONGODB_URL = os.environ.get("MONGODB_URL")
+RAINFALL_DB = 'rainfall'
+FILES_COLLECTION = 'files'
+FOLDERS_COLLECTION = 'folders'
 
 
 class PandasInputNode(InputNode):
@@ -77,17 +85,6 @@ class PandasCSVLoader(PandasInputNode):
     documentation.
     """
 
-    # _parameters = { "filepath_or_buffer": PandasParameter("filepath_or_buffer", str, is_mandatory=True),
-    # sep=<no_default>, delimiter=None, header='infer', names=<no_default>, index_col=None, usecols=None,
-    # squeeze=False, prefix=<no_default>, mangle_dupe_cols=True, dtype=None, engine=None, converters=None,
-    # true_values=None, false_values=None, skipinitialspace=False, skiprows=None, skipfooter=0, nrows=None,
-    # na_values=None, keep_default_na=True, na_filter=True, verbose=False, skip_blank_lines=True, parse_dates=False,
-    # infer_datetime_format=False, keep_date_col=False, date_parser=None, dayfirst=False, cache_dates=True,
-    # iterator=False, chunksize=None, compression='infer', thousands=None, decimal='.', lineterminator=None,
-    # quotechar='"', quoting=0, doublequote=True, escapechar=None, comment=None, encoding=None,
-    # encoding_errors='strict', dialect=None, error_bad_lines=None, warn_bad_lines=None, on_bad_lines=None,
-    # delim_whitespace=False, low_memory=True, memory_map=False, float_precision=None, storage_options=None }
-
     def __init__(self, node_id: str, path: str, delim: str = ",", index_col: Union[int, str] = None):
         super(PandasCSVLoader, self).__init__(node_id)
 
@@ -134,17 +131,6 @@ class PandasCSVWriter(PandasOutputNode):
     to_csv documentation.
     """
 
-    # _parameters = { "filepath_or_buffer": PandasParameter("filepath_or_buffer", str, is_mandatory=True),
-    # sep=<no_default>, delimiter=None, header='infer', names=<no_default>, index_col=None, usecols=None,
-    # squeeze=False, prefix=<no_default>, mangle_dupe_cols=True, dtype=None, engine=None, converters=None,
-    # true_values=None, false_values=None, skipinitialspace=False, skiprows=None, skipfooter=0, nrows=None,
-    # na_values=None, keep_default_na=True, na_filter=True, verbose=False, skip_blank_lines=True, parse_dates=False,
-    # infer_datetime_format=False, keep_date_col=False, date_parser=None, dayfirst=False, cache_dates=True,
-    # iterator=False, chunksize=None, compression='infer', thousands=None, decimal='.', lineterminator=None,
-    # quotechar='"', quoting=0, doublequote=True, escapechar=None, comment=None, encoding=None,
-    # encoding_errors='strict', dialect=None, error_bad_lines=None, warn_bad_lines=None, on_bad_lines=None,
-    # delim_whitespace=False, low_memory=True, memory_map=False, float_precision=None, storage_options=None }
-
     def __init__(
         self,
         node_id: str,
@@ -174,3 +160,102 @@ class PandasCSVWriter(PandasOutputNode):
             self.dataset = pd.DataFrame(self.dataset)
 
         self.dataset.to_csv(**param_dict)
+
+
+class RainfallCSVLoader(PandasInputNode):
+    """Loads a pandas DataFrame from a local CSV file.
+
+    Output
+    ------
+    dataset : pandas.DataFrame
+        The loaded csv file as a pandas DataFrame.
+
+    Parameters
+    ----------
+    file_id : str
+        Identifier of the CSV file.
+    delim : str, default ','
+        Delimiter symbol of the CSV file.
+    index_col : str, default=None
+        Column to use as the row labels of the DataFrame, given as string name
+
+    Notes
+    -----
+    Visit `<https://pandas.pydata.org/pandas-docs/version/1.3/reference/api/pandas.read_csv.html>`_ for Pandas read_csv
+    documentation.
+    """
+    def __init__(self, node_id: str, file_id: str, delim: str = ",", index_col: Union[int, str] = None):
+        super(RainfallCSVLoader, self).__init__(node_id)
+        self.parameters = Parameters(
+            file_id=KeyValueParameter("file_id", str, file_id),
+            delim=KeyValueParameter("delimiter", str, delim),
+            index_col=KeyValueParameter("index_col", str, index_col)
+        )
+
+    def execute(self):
+        client = MongoClient(MONGODB_URL)
+        db = client[RAINFALL_DB]
+        collection = db[FILES_COLLECTION]
+        document = collection.find_one({'_id': self.parameters.file_id.value})
+        df = pandas.read_csv(
+            StringIO(document['content']), 
+            delimiter=self.parameters.delim.value, 
+            index_col=self.parameters.index_col.value
+        )
+        self.dataset = df
+
+class RainfallCSVWriter(PandasOutputNode):
+    """Writes a pandas DataFrame into a local CSV file.
+
+    Input
+    -----
+    dataset : pandas.DataFrame
+        The pandas DataFrame to write in a CSV file.
+
+    Parameters
+    ----------
+    name : str
+        Of the resulting CSV file.
+    folder_id : str
+        Identifier of the folder.
+
+    Notes
+    -----
+    Visit `<https://pandas.pydata.org/pandas-docs/version/1.3/reference/api/pandas.DataFrame.to_csv.html>`_ for Pandas
+    to_csv documentation.
+    """
+
+    def __init__(
+        self,
+        node_id: str,
+        folder_id: str,
+        name: str = "result.csv"
+    ):
+        super(RainfallCSVWriter, self).__init__(node_id)
+        self.parameters = Parameters(
+            folder_id=KeyValueParameter("folder_id", str, folder_id),
+            name=KeyValueParameter("name", str, name),
+        )
+
+    def execute(self):
+        client = MongoClient(MONGODB_URL)
+        db = client[RAINFALL_DB]
+        collection = db[FILES_COLLECTION]
+        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        file_id = 'file-' + str(uuid.uuid4())
+        csv_buffer = StringIO()
+        self.dataset.to_csv(csv_buffer, index=False)
+        csv_string = csv_buffer.getvalue()
+        file = {
+            "_id": file_id,
+            "created_at": current_time,
+            "name": self.parameters.name.value,
+            "content": csv_string,
+            "folder": self.parameters.folder_id.value
+        }
+        collection.insert_one(file)
+        collection = db[FOLDERS_COLLECTION]
+        collection.update_one(
+            {"_id": self.parameters.folder_id.value},
+            {"$push": {"files": file_id}}
+        )

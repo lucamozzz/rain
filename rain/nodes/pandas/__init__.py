@@ -33,6 +33,8 @@ from rain.nodes.pandas.transform_nodes import (
 from rain.nodes.pandas.pandas_io import (
     PandasCSVLoader,
     PandasCSVWriter,
+    RainfallCSVLoader,
+    RainfallCSVWriter
 )
 
 from rain.nodes.pandas.zscore import (

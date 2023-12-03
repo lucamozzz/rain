@@ -19,6 +19,9 @@
 from rain.nodes.pm4py.pm4py_io import (
     Pm4pyXESLoader,
     Pm4pyXESWriter,
+    RainfallBPMNWriter,
+    RainfallXESLoader,
+    RainfallXESWriter
 )
 
 from rain.nodes.pm4py.pm4py_conformance import (
