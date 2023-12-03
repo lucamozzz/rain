@@ -275,7 +275,7 @@ class RainfallBPMNWriter(OutputNode):
         file_id = 'file-' + str(uuid.uuid4())
         file_path = "./" + file_id + ".bpmn"
         pm4py.write_bpmn(self.model, file_path)
-        log = pm4py.read_xes(".")
+        log = pm4py.read_xes(file_path)
         bpmn = pm4py.discover_bpmn_inductive(log)
         pm4py.write_bpmn(bpmn, )
         with open(file_path, 'r') as bpmn_file:
