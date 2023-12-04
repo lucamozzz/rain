@@ -131,7 +131,8 @@ class KMedoidsClusterer(SklearnClusterer):
 
     def execute(self):
         super(KMedoidsClusterer, self).execute()
-        self.labels = self.fitted_model.labels_
+        # self.labels = self.fitted_model.labels_
+        self.labels = pandas.DataFrame(self.fitted_model.labels_)
         if self.parameters.metric.value == "precomputed":
             self.medoids = pandas.DataFrame(self.fitted_model.medoid_indices_)
         else:
