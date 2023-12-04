@@ -156,8 +156,8 @@ class PandasCSVWriter(PandasOutputNode):
     def execute(self):
         param_dict = self.parameters.get_dict_from_group("write_csv")
 
-        if not isinstance(self.dataset, pd.DataFrame):
-            self.dataset = pd.DataFrame(self.dataset)
+        if not isinstance(self.dataset, pandas.DataFrame):
+            self.dataset = pandas.DataFrame(self.dataset)
 
         self.dataset.to_csv(**param_dict)
 
