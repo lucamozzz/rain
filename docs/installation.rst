@@ -12,7 +12,7 @@ To install Rain library, run this command in your terminal:
 
 .. code-block:: console
 
-    $ pip install git+https://github.com/SIMPLE-DVS/rain.git
+    $ pip install git+ssh://git@bitbucket.org/proslabteam/rain_unicam@main#egg=rain
 
 This is the preferred method to install Rain, as it will always install the most recent stable release.
 
@@ -32,23 +32,9 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone https://github.com/SIMPLE-DVS/rain.git
+    $ git clone git@bitbucket.org:proslabteam/rainfall_unicam.git
 
-Or download the `tarball`_:
-
-.. code-block:: console
-
-    $ curl -OJL https://github.com/SIMPLE-DVS/rain/tarball/master
-
-Once you have a copy of the source, you can install it with:
-
-.. code-block:: console
-
-    $ python setup.py install
-
-
-.. _Github repo: https://github.com/SIMPLE-DVS/rain
-.. _tarball: https://github.com/SIMPLE-DVS/rain/tarball/master
+.. _Github repo: https://bitbucket.org:proslabteam/rainfall_unicam
 
 Finally, you can use Rain as a standard Python library, so importing it in your script:
 
