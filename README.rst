@@ -2,7 +2,7 @@
    :alt: Codecov
    :target: https://app.codecov.io/gh/SIMPLE-DVS/rain
 
-.. |License| image:: https://img.shields.io/github/license/simple-dvs/rain
+.. |License| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
 
 |Codecov| |License|
 
