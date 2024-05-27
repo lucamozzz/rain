@@ -34,7 +34,8 @@ from rain.nodes.pandas.pandas_io import (
     PandasCSVLoader,
     PandasCSVWriter,
     RainfallCSVLoader,
-    RainfallCSVWriter
+    RainfallCSVWriter,
+    PandasTableVisualizer
 )
 
 from rain.nodes.pandas.zscore import (

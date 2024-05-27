@@ -17,6 +17,7 @@
  """
 
 import os
+import sys
 import uuid
 from io import StringIO
 from abc import abstractmethod
@@ -31,6 +32,8 @@ import pandas
 MONGODB_URL = os.environ.get("MONGODB_URL")
 RAINFALL_DB = 'rainfall'
 FILES_COLLECTION = 'files'
+EXECUTIONS_COLLECTION = 'executions'
+VISUALS_COLLECTION = 'visuals'
 FOLDERS_COLLECTION = 'folders'
 
 
@@ -160,6 +163,57 @@ class PandasCSVWriter(PandasOutputNode):
             self.dataset = pandas.DataFrame(self.dataset)
 
         self.dataset.to_csv(**param_dict)
+
+
+class PandasTableVisualizer(PandasOutputNode):
+    """Writes a pandas DataFrame into a PNG table.
+
+    Input
+    -----
+    dataset : pandas.DataFrame
+        The pandas DataFrame to write in a CSV PNG table.
+
+    Parameters
+    ----------
+    name : str
+        Of the PNG file.
+
+    Notes
+    -----
+    Visit `<https://pandas.pydata.org/pandas-docs/version/1.3/reference/api/pandas.DataFrame.to_csv.html>`_ for Pandas
+    to_csv documentation.
+    """
+
+    def __init__(
+        self,
+        node_id: str,
+        name: str = "result",
+    ):
+        super(PandasTableVisualizer, self).__init__(node_id)
+        self.parameters = Parameters(
+            name=KeyValueParameter("file_name", str, name)
+        )
+
+    def execute(self):
+        html = self.dataset.to_html(max_rows=50)
+        client = MongoClient(MONGODB_URL)
+        db = client[RAINFALL_DB]
+        collection = db[VISUALS_COLLECTION]
+        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        file_id = 'file-' + str(uuid.uuid4())
+        file = {
+            "_id": file_id,
+            "created_at": current_time,
+            "name": self.parameters.name.value,
+            "content": html,
+            "execution": sys.argv[1]
+        }
+        collection.insert_one(file)
+        collection = db[EXECUTIONS_COLLECTION]
+        collection.update_one(
+            {"_id": sys.argv[1]},
+            {"$push": {"visuals": file_id}}
+        )
 
 
 class RainfallCSVLoader(PandasInputNode):
