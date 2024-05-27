@@ -195,18 +195,17 @@ class PandasTableVisualizer(PandasOutputNode):
         )
 
     def execute(self):
+        html = self.dataset.to_html(max_rows=50)
         client = MongoClient(MONGODB_URL)
         db = client[RAINFALL_DB]
         collection = db[VISUALS_COLLECTION]
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         file_id = 'file-' + str(uuid.uuid4())
-        html_buffer = StringIO()
-        self.dataset.to_html(html_buffer, max_rows=50)
         file = {
             "_id": file_id,
             "created_at": current_time,
             "name": self.parameters.name.value,
-            "content": html_buffer.getvalue(),
+            "content": html,
             "execution": sys.argv[1]
         }
         collection.insert_one(file)
