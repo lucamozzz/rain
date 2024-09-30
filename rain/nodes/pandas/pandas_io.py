@@ -88,7 +88,7 @@ class PandasCSVLoader(PandasInputNode):
         super(PandasCSVLoader, self).__init__(node_id)
         
         if len(sys.argv) > 1:
-            path = '/tmp/data/' + sys.argv[1] + '/' + path
+            path = '/tmp/data/' + sys.argv[1] + '/folders/' + path
 
         self.parameters = Parameters(
             path=KeyValueParameter("filepath_or_buffer", str, path),
@@ -146,7 +146,7 @@ class PandasCSVWriter(PandasOutputNode):
         super(PandasCSVWriter, self).__init__(node_id)
         
         if len(sys.argv) > 1:
-            path = '/tmp/data/' + sys.argv[1] + '/' + '/'.join(path.split('/')[-2:])
+            path = '/tmp/data/' + sys.argv[1] + '/folders/' + '/'.join(path.split('/')[-2:])
 
         self.parameters = Parameters(
             path=KeyValueParameter("path_or_buf", str, path),
