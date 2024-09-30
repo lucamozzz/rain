@@ -92,7 +92,7 @@ class PandasCSVLoader(PandasInputNode):
         super(PandasCSVLoader, self).__init__(node_id)
         
         if os.getenv('ISSUED_BY') is not None:
-            path = '/mnt/data/' + os.getenv('ISSUED_BY') + '/' + path
+            path = '/tmp/data/' + os.getenv('ISSUED_BY') + '/' + path
 
         self.parameters = Parameters(
             path=KeyValueParameter("filepath_or_buffer", str, path),
@@ -150,7 +150,7 @@ class PandasCSVWriter(PandasOutputNode):
         super(PandasCSVWriter, self).__init__(node_id)
         
         if os.getenv('ISSUED_BY') is not None:
-            path = '/mnt/data/' + os.getenv('ISSUED_BY') + '/' + '/'.join(path.split('/')[-2:])
+            path = '/tmp/data/' + os.getenv('ISSUED_BY') + '/' + '/'.join(path.split('/')[-2:])
 
         self.parameters = Parameters(
             path=KeyValueParameter("path_or_buf", str, path),
