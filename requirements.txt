@@ -1,5 +1,4 @@
 setuptools~=57.4.0
 loguru~=0.6.0
 networkx~=2.7.1
-# numpy==1.26.4
-pandas
+pandas~=2.2.3
