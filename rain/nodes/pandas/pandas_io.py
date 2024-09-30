@@ -17,6 +17,7 @@
  """
 
 import os
+import sys
 from abc import abstractmethod
 from typing import Union
 from rain.core.base import InputNode, OutputNode, Tags, LibTag, TypeTag
@@ -86,8 +87,8 @@ class PandasCSVLoader(PandasInputNode):
     def __init__(self, node_id: str, path: str, delim: str = ",", index_col: Union[int, str] = None):
         super(PandasCSVLoader, self).__init__(node_id)
         
-        if os.getenv('ISSUED_BY') is not None:
-            path = '/tmp/data/' + os.getenv('ISSUED_BY') + '/' + path
+        if len(sys.argv) > 1:
+            path = '/tmp/data/' + sys.argv[1] + '/' + path
 
         self.parameters = Parameters(
             path=KeyValueParameter("filepath_or_buffer", str, path),
@@ -144,8 +145,8 @@ class PandasCSVWriter(PandasOutputNode):
     ):
         super(PandasCSVWriter, self).__init__(node_id)
         
-        if os.getenv('ISSUED_BY') is not None:
-            path = '/tmp/data/' + os.getenv('ISSUED_BY') + '/' + '/'.join(path.split('/')[-2:])
+        if len(sys.argv) > 1:
+            path = '/tmp/data/' + sys.argv[1] + '/' + '/'.join(path.split('/')[-2:])
 
         self.parameters = Parameters(
             path=KeyValueParameter("path_or_buf", str, path),
