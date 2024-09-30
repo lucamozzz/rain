@@ -16,21 +16,12 @@
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  """
 
-import os
 import sys
 from abc import abstractmethod
 from typing import Union
 from rain.core.base import InputNode, OutputNode, Tags, LibTag, TypeTag
 from rain.core.parameter import KeyValueParameter, Parameters
 import pandas
-
-
-MONGODB_URL = os.environ.get("MONGODB_URL")
-RAINFALL_DB = 'rainfall'
-FILES_COLLECTION = 'files'
-EXECUTIONS_COLLECTION = 'executions'
-VISUALS_COLLECTION = 'visuals'
-FOLDERS_COLLECTION = 'folders'
 
 
 class PandasInputNode(InputNode):
