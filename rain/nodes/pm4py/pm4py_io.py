@@ -141,9 +141,7 @@ class Pm4pyBPMNWriter(OutputNode):
 
     Parameters
     ----------
-    folder : str
-        Folder where the BPMN file will be stored.
-    name : str
+    path : str
         Of the BPMN file.
     """
 
