@@ -16,22 +16,12 @@
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  """
 
-import os
-import uuid
-from io import StringIO
+import sys
 from abc import abstractmethod
 from typing import Union
-from datetime import datetime
 from rain.core.base import InputNode, OutputNode, Tags, LibTag, TypeTag
 from rain.core.parameter import KeyValueParameter, Parameters
-from pymongo import MongoClient
 import pandas
-
-
-MONGODB_URL = os.environ.get("MONGODB_URL")
-RAINFALL_DB = 'rainfall'
-FILES_COLLECTION = 'files'
-FOLDERS_COLLECTION = 'folders'
 
 
 class PandasInputNode(InputNode):
@@ -87,6 +77,9 @@ class PandasCSVLoader(PandasInputNode):
 
     def __init__(self, node_id: str, path: str, delim: str = ",", index_col: Union[int, str] = None):
         super(PandasCSVLoader, self).__init__(node_id)
+        
+        if len(sys.argv) > 1:
+            path = '/tmp/data/' + sys.argv[1] + '/folders/' + path
 
         self.parameters = Parameters(
             path=KeyValueParameter("filepath_or_buffer", str, path),
@@ -142,6 +135,10 @@ class PandasCSVWriter(PandasOutputNode):
         columns: list = None,
     ):
         super(PandasCSVWriter, self).__init__(node_id)
+        
+        if len(sys.argv) > 1:
+            path = '/tmp/data/' + sys.argv[1] + '/folders/' + '/'.join(path.split('/')[-2:])
+
         self.parameters = Parameters(
             path=KeyValueParameter("path_or_buf", str, path),
             delim=KeyValueParameter("sep", str, delim),
@@ -160,102 +157,3 @@ class PandasCSVWriter(PandasOutputNode):
             self.dataset = pandas.DataFrame(self.dataset)
 
         self.dataset.to_csv(**param_dict)
-
-
-class RainfallCSVLoader(PandasInputNode):
-    """Loads a pandas DataFrame from a local CSV file.
-
-    Output
-    ------
-    dataset : pandas.DataFrame
-        The loaded csv file as a pandas DataFrame.
-
-    Parameters
-    ----------
-    file_id : str
-        Identifier of the CSV file.
-    delim : str, default ','
-        Delimiter symbol of the CSV file.
-    index_col : str, default=None
-        Column to use as the row labels of the DataFrame, given as string name
-
-    Notes
-    -----
-    Visit `<https://pandas.pydata.org/pandas-docs/version/1.3/reference/api/pandas.read_csv.html>`_ for Pandas read_csv
-    documentation.
-    """
-    def __init__(self, node_id: str, file_id: str, delim: str = ",", index_col: Union[int, str] = None):
-        super(RainfallCSVLoader, self).__init__(node_id)
-        self.parameters = Parameters(
-            file_id=KeyValueParameter("file_id", str, file_id),
-            delim=KeyValueParameter("delimiter", str, delim),
-            index_col=KeyValueParameter("index_col", str, index_col)
-        )
-
-    def execute(self):
-        client = MongoClient(MONGODB_URL)
-        db = client[RAINFALL_DB]
-        collection = db[FILES_COLLECTION]
-        document = collection.find_one({'_id': self.parameters.file_id.value})
-        df = pandas.read_csv(
-            StringIO(document['content']), 
-            delimiter=self.parameters.delim.value, 
-            index_col=self.parameters.index_col.value
-        )
-        self.dataset = df
-
-class RainfallCSVWriter(PandasOutputNode):
-    """Writes a pandas DataFrame into a local CSV file.
-
-    Input
-    -----
-    dataset : pandas.DataFrame
-        The pandas DataFrame to write in a CSV file.
-
-    Parameters
-    ----------
-    name : str
-        Of the resulting CSV file.
-    folder_id : str
-        Identifier of the folder.
-
-    Notes
-    -----
-    Visit `<https://pandas.pydata.org/pandas-docs/version/1.3/reference/api/pandas.DataFrame.to_csv.html>`_ for Pandas
-    to_csv documentation.
-    """
-
-    def __init__(
-        self,
-        node_id: str,
-        folder_id: str,
-        name: str = "result.csv"
-    ):
-        super(RainfallCSVWriter, self).__init__(node_id)
-        self.parameters = Parameters(
-            folder_id=KeyValueParameter("folder_id", str, folder_id),
-            name=KeyValueParameter("name", str, name),
-        )
-
-    def execute(self):
-        client = MongoClient(MONGODB_URL)
-        db = client[RAINFALL_DB]
-        collection = db[FILES_COLLECTION]
-        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        file_id = 'file-' + str(uuid.uuid4())
-        csv_buffer = StringIO()
-        self.dataset.to_csv(csv_buffer, index=False)
-        csv_string = csv_buffer.getvalue()
-        file = {
-            "_id": file_id,
-            "created_at": current_time,
-            "name": self.parameters.name.value,
-            "content": csv_string,
-            "folder": self.parameters.folder_id.value
-        }
-        collection.insert_one(file)
-        collection = db[FOLDERS_COLLECTION]
-        collection.update_one(
-            {"_id": self.parameters.folder_id.value},
-            {"$push": {"files": file_id}}
-        )

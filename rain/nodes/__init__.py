@@ -62,3 +62,8 @@ try:
     from rain.nodes.google_cloud_storage import *
 except ModuleNotFoundError or ImportError:
     pass
+
+try:
+    from rain.nodes.pytorch import *
+except ModuleNotFoundError or ImportError:
+    pass

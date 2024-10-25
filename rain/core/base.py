@@ -41,6 +41,7 @@ class LibTag(Enum):
     PANDAS = "Pandas"
     PM4PY = "pm4py"
     SPARK = "PySpark"
+    TORCH = "torch"
     SKLEARN = "scikit-learn\nscikit-learn-extra "
     MONGODB = "PyMongo"
     TPOT = 'TPOT'
@@ -66,6 +67,7 @@ class TypeTag(Enum):
     REGRESSOR = "Regressor"
     ESTIMATOR = "Estimator"
     TRAINER = "Trainer"
+    NN = "Neural Network"
     PREDICTOR = "Predictor"
     METRICS = "Metrics"
     OTHER = "Other"

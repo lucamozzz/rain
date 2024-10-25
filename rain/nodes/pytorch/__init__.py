@@ -16,16 +16,7 @@
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  """
 
-from rain.nodes.pm4py.pm4py_io import (
-    Pm4pyXESLoader,
-    Pm4pyXESWriter,
-    Pm4pyBPMNWriter,
+from rain.nodes.pytorch.sequential import (
+    SequentialNN,
 )
 
-from rain.nodes.pm4py.pm4py_conformance import (
-    Pm4pyTokenBasedReplay,
-)
-
-from rain.nodes.pm4py.pm4py_discovery import (
-    Pm4pyInductiveMiner,
-)
