@@ -30,10 +30,10 @@ with open("README.rst") as readme_file:
 with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
-with open("requirements.txt") as f:
+with open("/opt/atlassian/pipelines/agent/build/requirements.txt") as f:
     requirements = f.read().splitlines()
 
-with open("requirements_dev.txt") as f:
+with open("/opt/atlassian/pipelines/agent/build/requirements_dev.txt") as f:
     requirements_full = f.read().splitlines()
 
 extras_require = {
