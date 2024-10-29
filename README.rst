@@ -170,4 +170,4 @@ Authors
 -------
 
 * Alessandro Antinori, Rosario Capparuccia, Riccardo Coltrinari, Flavio Corradini, Marco Piangerelli, 
-Barbara Re, Marco Scarpetta, Luca Mozzoni, Vincenzo Nucci, Luca Mozzoni, Vincenzo Nucci
+Barbara Re, Marco Scarpetta, Luca Mozzoni, Vincenzo Nucci

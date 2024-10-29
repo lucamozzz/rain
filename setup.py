@@ -21,6 +21,7 @@
 """The setup script."""
 
 import versioneer
+import os
 
 from setuptools import setup, find_packages
 
@@ -30,10 +31,15 @@ with open("README.rst") as readme_file:
 with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
-with open("/opt/atlassian/pipelines/agent/build/requirements.txt") as f:
+if os.path.exists("/opt/atlassian/pipelines/agent/build/"):
+    path = "/opt/atlassian/pipelines/agent/build/"
+else:
+    path = "/workspaces/rain/"
+    
+with open(path + "requirements.txt") as f:
     requirements = f.read().splitlines()
 
-with open("/opt/atlassian/pipelines/agent/build/requirements_dev.txt") as f:
+with open(path + "requirements_dev.txt") as f:
     requirements_full = f.read().splitlines()
 
 extras_require = {
@@ -61,7 +67,7 @@ setup(
     install_requires=requirements,
     extras_require=extras_require,
     license="GNU General Public License",
-    long_description=readme + "\n\n" + history,
+    long_description=readme,
     long_description_content_type="text/markdown",
     include_package_data=True,
     keywords="rain",
