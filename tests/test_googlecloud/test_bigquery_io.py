@@ -18,7 +18,7 @@
 
 from sklearn.datasets import load_iris
 from pandas import DataFrame
-from rain.nodes.google_cloud.bigquery_io import BigQueryCSVLoader, BigQueryCSVWriter
+from rain.nodes.google_cloud_bigquery.bigquery_io import BigQueryCSVLoader, BigQueryCSVWriter
 from tests.test_commons import check_param_not_found
 
 

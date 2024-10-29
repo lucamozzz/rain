@@ -17,7 +17,7 @@
  """
 
 import json
-
+import requests
 from setuptools import find_packages
 import importlib
 import inspect
@@ -142,12 +142,15 @@ def get_simple_nodes_info(node_subclasses: set):
             docstring._parsed_data.get("Parameters")
         )
         parameters = get_parameters(cls, params_desc, params_type)
-        methods = list(cls._methods.keys()) if hasattr(cls, "_methods") else None
+        methods = list(cls._methods.keys()) if hasattr(
+            cls, "_methods") else None
         in_vars = (
-            get_io_structure(cls._input_vars) if hasattr(cls, "_input_vars") else None
+            get_io_structure(cls._input_vars) if hasattr(
+                cls, "_input_vars") else None
         )
         out_vars = (
-            get_io_structure(cls._output_vars) if hasattr(cls, "_output_vars") else None
+            get_io_structure(cls._output_vars) if hasattr(
+                cls, "_output_vars") else None
         )
         node_type = {
             "library": cls._get_tags().library.value,
@@ -190,7 +193,8 @@ def get_parameters(cls, params_desc, params_type):
     Given a SimpleNode class and the information about its parameters, it returns a list containing the name,
     the type, the default_value, the description and if it is mandatory for each parameter.
     """
-    cls_parameters = list(inspect.signature(cls.__init__).parameters.values())[2:]
+    cls_parameters = list(inspect.signature(
+        cls.__init__).parameters.values())[2:]
     parameters = []
     for p in cls_parameters:
         name = p.name
@@ -259,5 +263,8 @@ def get_analyzed_nodes():
 
 
 if __name__ == "__main__":
-    n = analyze()
-    print("ok")
+    analyze()
+    with open("./analyzer_output/rain_structure.json", "rb") as f:
+        response = requests.put("https://storage.googleapis.com/rainfall-e8e57.appspot.com/rain_structure.json",
+                                data=f, headers={"Content-Type": "application/json"})
+    print("Rain structure successfully updated!")

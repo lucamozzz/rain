@@ -34,10 +34,10 @@ with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
 with open("requirements_dev.txt") as f:
-    requirements_full = f.read()
+    requirements_full = f.read().splitlines()
 
 extras_require = {
-    "full": requirements_full.splitlines()
+    "full": requirements_full
 }
 
 test_requirements = [
@@ -50,7 +50,7 @@ setup(
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Developers",
-        "LICENSE :: OSI APPROVED :: GNU General Public License",
+        # "LICENSE :: OSI APPROVED :: GNU General Public License",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
@@ -62,14 +62,15 @@ setup(
     extras_require=extras_require,
     license="GNU General Public License",
     long_description=readme + "\n\n" + history,
+    long_description_content_type="text/markdown",
     include_package_data=True,
     keywords="rain",
-    name="rain",
+    name="rain-dm",
     packages=find_packages(include=["rain", "rain.*"]),
     test_suite="tests",
     tests_require=test_requirements,
     url="https://bitbucket.org/proslabteam/rain_unicam",
-    version=versioneer.get_version(),
+    version="1." + versioneer.get_increasing_version(),
     cmdclass=versioneer.get_cmdclass(),
     zip_safe=False,
 )
