@@ -1,0 +1,9 @@
+{
+  "name": "rain",
+  "image": "mcr.microsoft.com/devcontainers/python:3.8",
+  "containerEnv": {
+    "RAIN_REPOSITORY_URL": "rain-dm",
+    "RAIN_STRUCTURE_URL": "https://firebasestorage.googleapis.com/v0/b/rainfall-e8e57.appspot.com/o/rain_structure.json?alt=media"
+  },
+  "postCreateCommand": "pip install --upgrade pip && pip install -r requirements_dev.txt"
+}

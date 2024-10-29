@@ -281,6 +281,7 @@ import os
 import re
 import subprocess
 import sys
+from datetime import datetime, timezone
 
 
 class VersioneerConfig:  # pylint: disable=too-few-public-methods # noqa
@@ -1716,6 +1717,11 @@ def get_versions(verbose=False):
 def get_version():
     """Get the short version string for this project."""
     return get_versions()["version"]
+
+
+def get_increasing_version():
+    """Get the short version string for this project."""
+    return str(datetime.now(timezone.utc).timestamp())
 
 
 def get_cmdclass(cmdclass=None):  # noqa
