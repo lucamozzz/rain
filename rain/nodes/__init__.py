@@ -67,3 +67,43 @@ try:
     from rain.nodes.pytorch import *
 except ModuleNotFoundError or ImportError:
     pass
+
+try:
+    from rain.nodes.cdleeds import *
+except ModuleNotFoundError or ImportError:
+    pass
+
+try:
+    from rain.nodes.d3 import *
+except ModuleNotFoundError or ImportError:
+    pass
+
+try:
+    from rain.nodes.dynamo import *
+except ModuleNotFoundError or ImportError:
+    pass
+
+try:
+    from rain.nodes.erics import *
+except ModuleNotFoundError or ImportError:
+    pass
+
+try:
+    from rain.nodes.klcpd import *
+except ModuleNotFoundError or ImportError:
+    pass
+
+try:
+    from rain.nodes.md3 import *
+except ModuleNotFoundError or ImportError:
+    pass
+
+try:
+    from rain.nodes.nndvi import *
+except ModuleNotFoundError or ImportError:
+    pass
+
+try:
+    from rain.nodes.studd import *
+except ModuleNotFoundError or ImportError:
+    pass

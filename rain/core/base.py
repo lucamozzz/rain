@@ -72,6 +72,7 @@ class TypeTag(Enum):
     METRICS = "Metrics"
     OTHER = "Other"
     CUSTOM = "Custom"
+    DRIFT_DETECTOR = "Drift detector"
 
 
 @dataclass
